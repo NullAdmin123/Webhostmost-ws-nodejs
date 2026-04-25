@@ -1,5 +1,6 @@
 const os = require('os');
 const http = require('http');
+const https = require('https');
 const { Buffer } = require('buffer');
 const fs = require('fs');
 const axios = require('axios');
@@ -20,22 +21,42 @@ const NAME = process.env.NAME || '免费-WM-';
 const port = process.env.PORT || 3000;
 
 // 创建HTTP路由
-const httpServer = http.createServer((req, res) => {
-  if (req.url === '/') {
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('Hello, World\n');
-  } else if (req.url === '/sub') {
-    const vlessURL = `vless://${UUID}@skk.moe:443?encryption=none&security=tls&sni=${DOMAIN}&type=ws&host=${DOMAIN}&path=%2F#${NAME}`;
-    
-    const base64Content = Buffer.from(vlessURL).toString('base64');
-
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end(base64Content + '\n');
-  } else {
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('Not Found\n');
-  }
+const httpServer = http.createServer(async (req, res) => {
+    if (req.url === '/') {
+        res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+        res.end('Hello, World\n');
+    } else if (req.url === '/sub') {
+        const code = await getCountryCode();
+        const vlessURL = `vless://${UUID}@skk.moe:443?encryption=none&security=tls&sni=${DOMAIN}&type=ws&host=${DOMAIN}&path=%2F#${code}-${NAME}`;
+        const base64Content = Buffer.from(vlessURL).toString('base64');
+        res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+        res.end(base64Content + '\n');
+    } else if (req.url === '/suburl') {
+        const code = await getCountryCode();
+        const vlessURL = `vless://${UUID}@skk.moe:443?encryption=none&security=tls&sni=${DOMAIN}&type=ws&host=${DOMAIN}&path=%2F#${code}-${NAME}`;
+        res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+        res.end(vlessURL + '\n');
+    } else {
+        res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+        res.end('Not Found\n');
+    }
 });
+
+function getCountryCode() {
+    return new Promise((resolve) => {
+        https.get('https://1.1.1.1/cdn-cgi/trace', (res) => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                const match = data.match(/loc=([A-Z]{2})/);
+                resolve(match ? match[1] : "");
+            });
+        }).on('error', () => {
+            resolve(""); 
+        });
+    });
+}
+
 
 httpServer.listen(port, () => {
   console.log(`HTTP Server is running on port ${port}`);
