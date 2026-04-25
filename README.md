@@ -1,4 +1,4 @@
-
+wget -N https://raw.githubusercontent.com/NullAdmin123/Webhostmost-ws-nodejs/refs/heads/main/whw.sh && NAME=Node DOMAIN=xxxxxx.com bash whw.sh
 
 # Webhostmost项目部署
 
