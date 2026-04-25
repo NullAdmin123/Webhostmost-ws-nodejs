@@ -1,6 +1,5 @@
 const os = require('os');
 const http = require('http');
-const https = require('https');
 const { Buffer } = require('buffer');
 const fs = require('fs');
 const axios = require('axios');
@@ -18,27 +17,19 @@ const NEZHA_PORT = process.env.NEZHA_PORT || '443';        // 端口为443时自
 const NEZHA_KEY = process.env.NEZHA_KEY || '';             // 哪吒三个变量不全不运行
 const DOMAIN = process.env.DOMAIN || '#DOMAIN#';  //项目域名或已反代的域名，不带前缀，建议填已反代的域名
 const NAME = process.env.NAME || '免费-WM-';
-const port = process.env.PORT || 3000;
-var code = '';
+const port = process.env.PORT || 3100;
 
 // 创建HTTP路由
 const httpServer = http.createServer(async (req, res) => {
+    const vlessURL = `vless://${UUID}@skk.moe:443?encryption=none&security=tls&sni=${DOMAIN}&type=ws&host=${DOMAIN}&path=%2F#${NAME}`;
     if (req.url === '/') {
         res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
         res.end('Hello, World\n');
     } else if (req.url === '/sub') {
-		if(code == ''){
-			code = await getCountryCode();
-		}
-        const vlessURL = `vless://${UUID}@skk.moe:443?encryption=none&security=tls&sni=${DOMAIN}&type=ws&host=${DOMAIN}&path=%2F#${code}-${NAME}`;
         const base64Content = Buffer.from(vlessURL).toString('base64');
         res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
         res.end(base64Content + '\n');
     } else if (req.url === '/suburl') {
-		if(code == ''){
-			code = await getCountryCode();
-		}
-        const vlessURL = `vless://${UUID}@skk.moe:443?encryption=none&security=tls&sni=${DOMAIN}&type=ws&host=${DOMAIN}&path=%2F#${code}-${NAME}`;
         res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
         res.end(vlessURL + '\n');
     } else {
@@ -46,22 +37,6 @@ const httpServer = http.createServer(async (req, res) => {
         res.end('Not Found\n');
     }
 });
-
-function getCountryCode() {
-    return new Promise((resolve) => {
-        https.get('https://1.1.1.1/cdn-cgi/trace', (res) => {
-            let data = '';
-            res.on('data', chunk => data += chunk);
-            res.on('end', () => {
-                const match = data.match(/loc=([A-Z]{2})/);
-                resolve(match ? match[1] : "ER");
-            });
-        }).on('error', () => {
-            resolve("ER"); 
-        });
-    });
-}
-
 
 
 httpServer.listen(port, () => {
