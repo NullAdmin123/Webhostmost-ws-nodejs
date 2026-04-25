@@ -13,13 +13,11 @@ fi
 ps aux | grep '[d]omains' | awk '{print $2}' | xargs -r kill -9
 curl -s -o "/home/$username/domains/$domain/public_html/app.js" "https://raw.githubusercontent.com/NullAdmin123/Webhostmost-ws-nodejs/refs/heads/main/app.js"
 curl -s -o "/home/$username/domains/$domain/public_html/package.json" "https://raw.githubusercontent.com/NullAdmin123/Webhostmost-ws-nodejs/refs/heads/main/package.json"
-
+echo "---------------------------------------------"
 sed -i "s/#DOMAIN#/$domain/g" "/home/$username/domains/$domain/public_html/app.js"
 sed -i "s/3000;/$vl_port;/g" "/home/$username/domains/$domain/public_html/app.js"
 sed -i "s/#UUID#/$uuid/g" "/home/$username/domains/$domain/public_html/app.js"
-
-echo "https://$domain/$uuid" > "/home/$username/domains/keepsub.txt"
-echo "支持保活的节点分享链接：https://$domain/$uuid"
-echo "可在文件管理器中的keepsub.txt文件中可查看复"
 echo "---------------------------------------------"
+echo "节点链接：https://$domain/sub"
 echo "安装结束，请确保Node.js页面参数已设置完毕"
+echo "---------------------------------------------"
